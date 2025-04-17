@@ -27,18 +27,8 @@ ALERT_HYSTERESIS = 5  # Seconds before clearing alert
 SQLITE_DB = 'energy_readings.db'
 
 class EnergyMonitor:
-    def __init__(self):
-        self.load_config()
-        self.setup_hardware()
-        self.firebase_ref = self.init_firebase()
-        self.data_buffer = deque(maxlen=300)
-        self.alert_state = False
-        self.last_alert = 0
-        self.init_database()
-
-    def load_config(self):
-        with open(CONFIG_FILE) as f:
-            self.config = json.load(f)
+    def __init__(self, config):
+        self.config = config
         self.ct_ratio = self.config.get('ct_ratio', 2000)
         self.burden = self.config.get('burden_resistor', 10.0)
         self.voltage = self.config.get('mains_voltage', 230.0)
@@ -46,6 +36,13 @@ class EnergyMonitor:
         self.adc_channel = self.config.get('adc_channel', 0)
         self.alert_pin = self.config.get('alert_pin', 17)
         self.power_threshold = self.config.get('power_threshold', 1500)
+        self.firebase_url = self.config.get('firebase_url')
+        self.setup_hardware()
+        self.firebase_ref = self.init_firebase()
+        self.data_buffer = deque(maxlen=300)
+        self.alert_state = False
+        self.last_alert = 0
+        self.init_database()
 
     def setup_hardware(self):
         self.spi = spidev.SpiDev()
@@ -57,7 +54,7 @@ class EnergyMonitor:
     def init_firebase(self):
         cred = credentials.Certificate(FIREBASE_CRED)
         firebase_admin.initialize_app(cred, {
-            'databaseURL': self.config['firebase_url']
+            'databaseURL': self.firebase_url
         })
         return db.reference('/energy_data')
 
@@ -103,7 +100,7 @@ class EnergyMonitor:
     def trigger_alert(self, state):
         self.alert_state = state
         GPIO.output(self.alert_pin, state)
-        self.firebase_ref.child('alerts').push({
+        db.reference('/alerts').push({
             'timestamp': int(time.time()),
             'state': 'triggered' if state else 'cleared'
         })
@@ -137,7 +134,9 @@ class EnergyMonitor:
                 if len(self.data_buffer) >= 60:
                     batch = list(self.data_buffer)
                     self.data_buffer.clear()
-                    threading.Thread(target=self.firebase_ref.update, args=({str(d['timestamp']): d for d in batch},)).start()
+                    threading.Thread(
+                        target=lambda: self.firebase_ref.update({str(d['timestamp']): d for d in batch})
+                    ).start()
                 time.sleep(1.0 / SAMPLES_PER_CYCLE)
         except KeyboardInterrupt:
             print("Shutdown requested")
@@ -147,5 +146,7 @@ class EnergyMonitor:
             self.conn.close()
 
 if __name__ == '__main__':
-    monitor = EnergyMonitor()
+    with open(CONFIG_FILE) as f:
+        config = json.load(f)
+    monitor = EnergyMonitor(config)
     monitor.run()
