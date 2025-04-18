@@ -1,0 +1,11 @@
+{
+  "ct_ratio": 2000,
+  "burden_resistor": 10.0,
+  "mains_voltage": 230.0,
+  "power_factor": 0.95,
+  "adc_channel": 0,
+  "alert_pin": 17,
+  "power_threshold": 1500,
+  "firebase_url": "https://maxwell-home-power-monitor-default-rtdb.firebaseio.com"
+}
+  
