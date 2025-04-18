@@ -47,21 +47,8 @@ git clone https://github.com/yourusername/maxwell-monitor.git
 cd maxwell-monitor
 ```
 
-### **4. Configure the System**  
-Create a `config.json` file in the project directory with the following structure:
-
-```json
-{
-  "ct_ratio": 2000,
-  "burden_resistor": 10.0,
-  "mains_voltage": 230.0,
-  "power_factor": 0.95,
-  "power_threshold": 1500,
-  "alert_pin": 17,
-  "adc_channel": 0,
-  "firebase_url": "https://maxwell-home-power-monitor-default-rtdb.firebaseio.com/"
-}
-```
+### **4. Update Secret Key**  
+Due to security concerns, the Secret Key will need to be requested and added manually.
 
 ## **Running the Monitor**
 
