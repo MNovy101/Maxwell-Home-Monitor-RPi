@@ -14,9 +14,7 @@ A Python-based home energy monitoring system for Raspberry Pi that supports:
 ### **Hardware**  
 - Raspberry Pi (Model 3 or newer)  
 - Current transformer (CT) sensor  
-- Burden resistor (e.g., 10Ω)  
-- Optional: MLX90614 sensor for temperature readings  
-- Optional: RGB LED or other indicators for alerts  
+- Burden resistor
 
 ### **Software**  
 - Raspberry Pi OS (latest version)  
