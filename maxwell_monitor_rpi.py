@@ -1,5 +1,6 @@
 # main.py – Maxwell Home Monitor firmware
-
+import firebase_admin
+from firebase_admin import db, credentials
 import time, ujson, math
 import urequests as requests
 from machine import ADC, Pin
